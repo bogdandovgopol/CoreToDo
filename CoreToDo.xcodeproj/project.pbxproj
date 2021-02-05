@@ -16,6 +16,7 @@
 		43E7319425CBDC3200B85FF4 /* ToDoListItem+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E7319225CBDC3200B85FF4 /* ToDoListItem+CoreDataClass.swift */; };
 		43E7319525CBDC3200B85FF4 /* ToDoListItem+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E7319325CBDC3200B85FF4 /* ToDoListItem+CoreDataProperties.swift */; };
 		43E7319D25CBEAF200B85FF4 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 43E7319C25CBEAF200B85FF4 /* CloudKit.framework */; };
+		43E731A125CC3BE700B85FF4 /* ToDoDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43E731A025CC3BE700B85FF4 /* ToDoDataManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,7 @@
 		43E7319325CBDC3200B85FF4 /* ToDoListItem+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ToDoListItem+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		43E7319925CBEAEA00B85FF4 /* CoreToDo.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CoreToDo.entitlements; sourceTree = "<group>"; };
 		43E7319C25CBEAF200B85FF4 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
+		43E731A025CC3BE700B85FF4 /* ToDoDataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToDoDataManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +69,7 @@
 			children = (
 				43E7319925CBEAEA00B85FF4 /* CoreToDo.entitlements */,
 				43E7319725CBDC4000B85FF4 /* ToDoListItem */,
+				43E7319F25CC3BC000B85FF4 /* Managers */,
 				43E7317725CBD60800B85FF4 /* AppDelegate.swift */,
 				43E7317925CBD60800B85FF4 /* SceneDelegate.swift */,
 				43E7317B25CBD60800B85FF4 /* ViewController.swift */,
@@ -93,6 +96,14 @@
 				43E7319C25CBEAF200B85FF4 /* CloudKit.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		43E7319F25CC3BC000B85FF4 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				43E731A025CC3BE700B85FF4 /* ToDoDataManager.swift */,
+			);
+			path = Managers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -169,6 +180,7 @@
 				43E7317825CBD60800B85FF4 /* AppDelegate.swift in Sources */,
 				43E7319425CBDC3200B85FF4 /* ToDoListItem+CoreDataClass.swift in Sources */,
 				43E7319525CBDC3200B85FF4 /* ToDoListItem+CoreDataProperties.swift in Sources */,
+				43E731A125CC3BE700B85FF4 /* ToDoDataManager.swift in Sources */,
 				43E7317A25CBD60800B85FF4 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

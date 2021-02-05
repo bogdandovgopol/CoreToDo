@@ -9,8 +9,6 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
     let tableView: UITableView = {
         let table = UITableView()
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
@@ -46,55 +44,25 @@ class ViewController: UIViewController {
                 return
             }
             
-            self.createItem(name: text)
+            ToDoDataManager.shared.createItem(name: text) { [weak self](success) in
+                guard let self = self else { return }
+                if success {
+                    self.getAllItems()
+                }
+            }
         }))
         present(alert, animated: true, completion: nil)
     }
 
-    // Code Data
     func getAllItems() {
-        do {
-            models = try context.fetch(ToDoListItem.fetchRequest())
-            DispatchQueue.main.async {
+        DispatchQueue.main.async {
+            ToDoDataManager.shared.getAllItems { [weak self](items) in
+                guard let self = self else { return }
+                guard let items = items else { return }
+                
+                self.models = items
                 self.tableView.reloadData()
             }
-        } catch {
-            
-        }
-    }
-
-    func createItem(name: String) {
-        let newItem = ToDoListItem(context: context)
-        newItem.name = name
-        newItem.createdAt = Date()
-        
-        do {
-            try context.save()
-            getAllItems()
-        } catch{
-            
-        }
-    }
-    
-    func deleteItem(item: ToDoListItem) {
-        context.delete(item)
-        
-        do {
-            try context.save()
-            getAllItems()
-        } catch{
-            
-        }
-    }
-    
-    func updateItem(item: ToDoListItem, newName: String) {
-        item.name = newName
-        
-        do {
-            try context.save()
-            getAllItems()
-        } catch{
-            
         }
     }
 }
@@ -128,13 +96,23 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
                     return
                 }
                 
-                self.updateItem(item: item, newName: newName)
+                ToDoDataManager.shared.updateItem(item: item, newName: newName) { [weak self](success) in
+                    guard let self = self else { return }
+                    if success {
+                        self.getAllItems()
+                    }
+                }
             }))
             self.present(alert, animated: true, completion: nil)
         }))
         sheet.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { [weak self](_) in
             guard let self = self else { return }
-            self.deleteItem(item: item)
+            ToDoDataManager.shared.deleteItem(item: item) { [weak self](success) in
+                guard let self = self else { return }
+                if success {
+                    self.getAllItems()
+                }
+            }
         }))
         
         present(sheet, animated: true)
