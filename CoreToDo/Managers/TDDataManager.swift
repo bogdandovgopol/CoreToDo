@@ -81,7 +81,10 @@ struct TDDataManager {
         do {
             let request: NSFetchRequest<ToDoListItem> = ToDoListItem.fetchRequest()
             let predicate = NSPredicate(format: "name CONTAINS[cd] %@", name)
+            let sort = NSSortDescriptor(key: "name", ascending: true)
+            
             request.predicate = predicate
+            request.sortDescriptors = [sort]
             
             let filteredItems = try context.fetch(request)
             completion(filteredItems)
