@@ -9,9 +9,8 @@ import UIKit
 
 enum Section { case main }
 class TDDataSource: UITableViewDiffableDataSource<Section, ToDoListItem> {
-    var items = [ToDoListItem]()
-    
-    func updateDataSource() {
+
+    func updateDataSource(on items: [ToDoListItem]) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, ToDoListItem>()
         snapshot.appendSections([.main])
         snapshot.appendItems(items)

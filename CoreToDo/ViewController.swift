@@ -24,10 +24,16 @@ class ViewController: UIViewController {
         }
     }()
     
+    private var items = [ToDoListItem]()
+    private var filteredItems = [ToDoListItem]()
+    
+    private var isSearching = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureViewController()
         configureTableView()
+        configureSearchController()
         
         getAllItems()
     }
@@ -45,6 +51,17 @@ class ViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = dataSource
         tableView.frame = view.bounds
+    }
+    
+    fileprivate func configureSearchController() {
+        let searchController = UISearchController()
+        searchController.searchBar.delegate = self
+        searchController.searchResultsUpdater = self
+        searchController.searchBar.placeholder = "Search for a task"
+        searchController.searchBar.backgroundColor = .systemBackground
+        searchController.obscuresBackgroundDuringPresentation = false
+        
+        navigationItem.searchController = searchController
     }
     
     @objc
@@ -71,8 +88,8 @@ class ViewController: UIViewController {
             guard let self = self else { return }
             guard let items = items else { return }
             DispatchQueue.main.async {
-                self.dataSource.items = items
-                self.dataSource.updateDataSource()
+                self.items = items
+                self.dataSource.updateDataSource(on: items)
             }
         }
     }
@@ -80,7 +97,7 @@ class ViewController: UIViewController {
 
 extension ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return dataSource.items.count
+        return items.count
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -112,6 +129,21 @@ extension ViewController: UITableViewDelegate {
         }))
 
         present(sheet, animated: true)
+    }
+}
+
+extension ViewController: UISearchResultsUpdating, UISearchBarDelegate {
+    func updateSearchResults(for searchController: UISearchController) {
+        guard let filter = searchController.searchBar.text, !filter.isEmpty else {
+            filteredItems.removeAll()
+            isSearching = false
+            DispatchQueue.main.async { self.dataSource.updateDataSource(on: self.items) }
+            return
+        }
+        isSearching = true
+        
+        filteredItems = items.filter({($0.name?.lowercased().contains(filter.lowercased()) ?? false)})
+        DispatchQueue.main.async { self.dataSource.updateDataSource(on: self.filteredItems) }
     }
 }
 
