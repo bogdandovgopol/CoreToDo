@@ -16,12 +16,12 @@ struct TDDataManager {
     
     /// This function gets all to do items saved in CoreData
     /// - Parameter completion: Completion returns optional array of ToDoListItem
-    func getAllItems(completion: ([ToDoListItem]?) -> Void) {
+    func getAllItems(completion: ([ToDoListItem]) -> Void) {
         do {
             let items: [ToDoListItem] = try context.fetch(ToDoListItem.fetchRequest())
             completion(items)
         } catch {
-            completion(nil)
+            completion([])
         }
     }
     

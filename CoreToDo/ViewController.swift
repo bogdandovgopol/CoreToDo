@@ -85,7 +85,6 @@ class ViewController: UIViewController {
     fileprivate func getAllItems() {
         TDDataManager.shared.getAllItems { [weak self](items) in
             guard let self = self else { return }
-            guard let items = items else { return }
             DispatchQueue.main.async {
                 self.items = items
                 self.dataSource.updateDataSource(on: items)
