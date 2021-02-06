@@ -25,7 +25,6 @@ class ViewController: UIViewController {
     }()
     
     private var items = [ToDoListItem]()
-    private var filteredItems = [ToDoListItem]()
     
     private var isSearching = false
     
@@ -135,15 +134,16 @@ extension ViewController: UITableViewDelegate {
 extension ViewController: UISearchResultsUpdating, UISearchBarDelegate {
     func updateSearchResults(for searchController: UISearchController) {
         guard let filter = searchController.searchBar.text, !filter.isEmpty else {
-            filteredItems.removeAll()
             isSearching = false
             DispatchQueue.main.async { self.dataSource.updateDataSource(on: self.items) }
             return
         }
         isSearching = true
         
-        filteredItems = items.filter({($0.name?.lowercased().contains(filter.lowercased()) ?? false)})
-        DispatchQueue.main.async { self.dataSource.updateDataSource(on: self.filteredItems) }
+        TDDataManager.shared.filterItems(name: filter) { [weak self](filteredItems) in
+            guard let self = self else { return }
+            DispatchQueue.main.async { self.dataSource.updateDataSource(on: filteredItems) }
+        }
     }
 }
 

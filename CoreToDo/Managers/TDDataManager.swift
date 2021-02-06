@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreData
 
 struct TDDataManager {
     static let shared = TDDataManager()
@@ -69,6 +70,23 @@ struct TDDataManager {
             completion(true)
         } catch{
             completion(false)
+        }
+    }
+    
+    /// This function filters CoreData items by name
+    /// - Parameters:
+    ///   - name: Name of a task you want to search for
+    ///   - completion: Completion returns filtered array of items
+    func filterItems(name: String, completion: ([ToDoListItem]) -> Void) {
+        do {
+            let request: NSFetchRequest<ToDoListItem> = ToDoListItem.fetchRequest()
+            let predicate = NSPredicate(format: "name CONTAINS[cd] %@", name)
+            request.predicate = predicate
+            
+            let filteredItems = try context.fetch(request)
+            completion(filteredItems)
+        } catch {
+            completion([])
         }
     }
 }
