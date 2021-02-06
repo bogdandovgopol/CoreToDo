@@ -76,7 +76,7 @@ struct TDDataManager {
     /// This function filters CoreData items by name
     /// - Parameters:
     ///   - name: Name of a task you want to search for
-    ///   - completion: Completion returns filtered array of items
+    ///   - completion: Completion returns filtered array of items sorted in ascending order by name
     func filterItems(name: String, completion: ([ToDoListItem]) -> Void) {
         do {
             let request: NSFetchRequest<ToDoListItem> = ToDoListItem.fetchRequest()
