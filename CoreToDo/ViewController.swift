@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreData
 
 class ViewController: UIViewController {
     
@@ -14,28 +15,40 @@ class ViewController: UIViewController {
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         return table
     }()
+        
+    private lazy var dataSource: TDDataSource = {
+        return TDDataSource(tableView: tableView) { (tableView, indexPath, model) -> UITableViewCell? in
+            let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as UITableViewCell
+            cell.textLabel?.text = model.name
+            return cell
+        }
+    }()
     
-    private var models = [ToDoListItem]()
-
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        configureViewController()
+        configureTableView()
+        
+        getAllItems()
+    }
+    
+    fileprivate func configureViewController() {
         title = "CoreData To Do List"
         
         let addBarButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(onAddItemButtonPressed))
         navigationItem.rightBarButtonItem = addBarButton
         navigationController?.navigationBar.prefersLargeTitles = true
-
-        
-        view.addSubview(tableView)
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.frame = view.bounds
-        
-        getAllItems()
     }
     
-    @objc func onAddItemButtonPressed() {
+    fileprivate func configureTableView() {
+        view.addSubview(tableView)
+        tableView.delegate = self
+        tableView.dataSource = dataSource
+        tableView.frame = view.bounds
+    }
+    
+    @objc
+    fileprivate func onAddItemButtonPressed() {
         let alert = UIAlertController(title: "New Item", message: "Enter new item", preferredStyle: .alert)
         alert.addTextField(configurationHandler: nil)
         alert.addAction(UIAlertAction(title: "Submit", style: .cancel, handler: { [weak self](_) in
@@ -44,8 +57,7 @@ class ViewController: UIViewController {
                 return
             }
             
-            ToDoDataManager.shared.createItem(name: text) { [weak self](success) in
-                guard let self = self else { return }
+            TDDataManager.shared.createItem(name: text) { (success) in
                 if success {
                     self.getAllItems()
                 }
@@ -53,51 +65,44 @@ class ViewController: UIViewController {
         }))
         present(alert, animated: true, completion: nil)
     }
-
-    func getAllItems() {
-        DispatchQueue.main.async {
-            ToDoDataManager.shared.getAllItems { [weak self](items) in
-                guard let self = self else { return }
-                guard let items = items else { return }
-                
-                self.models = items
-                self.tableView.reloadData()
+    
+    fileprivate func getAllItems() {
+        TDDataManager.shared.getAllItems { [weak self](items) in
+            guard let self = self else { return }
+            guard let items = items else { return }
+            DispatchQueue.main.async {
+                self.dataSource.items = items
+                self.dataSource.updateDataSource()
             }
         }
     }
 }
 
-extension ViewController: UITableViewDelegate, UITableViewDataSource {
+extension ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return models.count
+        return dataSource.items.count
     }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let model = models[indexPath.row]
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as UITableViewCell
-        cell.textLabel?.text = model.name
-        return cell
-    }
-    
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
         
-        let item = models[indexPath.row]
-        let sheet = UIAlertController(title: "Edit", message: nil, preferredStyle: .actionSheet)
+        //display sheet with choice to edit, or cancel
+        let sheet = UIAlertController(title: "What do you want to do?", message: nil, preferredStyle: .actionSheet)
         sheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        sheet.addAction(UIAlertAction(title: "Edit", style: .default, handler: { (_) in
+        
+        sheet.addAction(UIAlertAction(title: "Edit", style: .default, handler: { [weak self](_) in
+            guard let self = self else { return }
             let alert = UIAlertController(title: "Edit Item", message: "Edit your item", preferredStyle: .alert)
             alert.addTextField(configurationHandler: nil)
             alert.textFields?.first?.text = item.name
-            
-            alert.addAction(UIAlertAction(title: "Save", style: .default, handler: { [weak self](_) in
-                guard let self = self else { return }
+
+            alert.addAction(UIAlertAction(title: "Save", style: .default, handler: { (_) in
                 guard let field = alert.textFields?.first, let newName = field.text, !newName.isEmpty else {
                     return
                 }
-                
-                ToDoDataManager.shared.updateItem(item: item, newName: newName) { [weak self](success) in
-                    guard let self = self else { return }
+
+                TDDataManager.shared.updateItem(item: item, newName: newName) { (success) in
                     if success {
                         self.getAllItems()
                     }
@@ -105,19 +110,8 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
             }))
             self.present(alert, animated: true, completion: nil)
         }))
-        sheet.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { [weak self](_) in
-            guard let self = self else { return }
-            ToDoDataManager.shared.deleteItem(item: item) { [weak self](success) in
-                guard let self = self else { return }
-                if success {
-                    self.getAllItems()
-                }
-            }
-        }))
-        
+
         present(sheet, animated: true)
     }
-    
-    
 }
 

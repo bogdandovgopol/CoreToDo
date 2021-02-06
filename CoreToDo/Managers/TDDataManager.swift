@@ -7,8 +7,8 @@
 
 import UIKit
 
-struct ToDoDataManager {
-    static let shared = ToDoDataManager()
+struct TDDataManager {
+    static let shared = TDDataManager()
     private init() {}
     
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
