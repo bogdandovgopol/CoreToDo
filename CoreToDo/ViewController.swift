@@ -50,6 +50,11 @@ class ViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = dataSource
         tableView.frame = view.bounds
+        
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(reloadItems), for: .valueChanged)
+        
+        tableView.refreshControl = refreshControl
     }
     
     fileprivate func configureSearchController() {
@@ -82,12 +87,18 @@ class ViewController: UIViewController {
         present(alert, animated: true, completion: nil)
     }
     
+    @objc
+    fileprivate func reloadItems() {
+        getAllItems()
+    }
+    
     fileprivate func getAllItems() {
         TDDataManager.shared.getAllItems { [weak self](items) in
             guard let self = self else { return }
             DispatchQueue.main.async {
                 self.items = items
                 self.dataSource.updateDataSource(on: items)
+                self.tableView.refreshControl?.endRefreshing()
             }
         }
     }
