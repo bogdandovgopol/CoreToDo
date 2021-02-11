@@ -8,11 +8,25 @@
 import UIKit
 import CoreData
 
-struct TDDataManager {
-    static let shared = TDDataManager()
-    private init() {}
+class TDDataManager {
     
-    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    let persistantContainer: NSPersistentContainer
+    let context: NSManagedObjectContext
+    
+    init() {
+        persistantContainer = NSPersistentContainer(name: "CoreToDo")
+        persistantContainer.loadPersistentStores { (description, error) in
+            if let error = error {
+                fatalError("Core Data store failed to load with error: \(error)")
+            }
+//            persistantContainer.viewContext.automaticallyMergesChangesFromParent = true
+        }
+        context = persistantContainer.viewContext
+    }
+    
+    
+    
+//    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     /// This function gets all to do items saved in CoreData
     /// - Parameter completion: Completion returns optional array of ToDoListItem
