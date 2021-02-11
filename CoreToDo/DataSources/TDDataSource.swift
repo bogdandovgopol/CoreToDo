@@ -9,6 +9,17 @@ import UIKit
 
 enum Section { case main }
 final class TDDataSource: UITableViewDiffableDataSource<Section, ToDoListItem> {
+    
+    private var tdDataManager: TDDataManager!
+    
+    override init(tableView: UITableView, cellProvider: @escaping UITableViewDiffableDataSource<Section, ToDoListItem>.CellProvider) {
+        super.init(tableView: tableView, cellProvider: cellProvider)
+    }
+    
+    convenience init(dataManager: TDDataManager, tableView: UITableView, cellProvider: @escaping UITableViewDiffableDataSource<Section, ToDoListItem>.CellProvider) {
+        self.init(tableView: tableView, cellProvider: cellProvider)
+        self.tdDataManager = dataManager
+    }
 
     func updateDataSource(on items: [ToDoListItem]) {
         var snapshot = NSDiffableDataSourceSnapshot<Section, ToDoListItem>()
@@ -26,14 +37,12 @@ final class TDDataSource: UITableViewDiffableDataSource<Section, ToDoListItem> {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             guard let item = itemIdentifier(for: indexPath) else { return }
-            TDDataManager.shared.deleteItem(item: item) { [weak self](success) in
-                guard let self = self else { return }
-                DispatchQueue.main.async {
-                    if success {
-                        var snapshot = self.snapshot()
-                        snapshot.deleteItems([item])
-                        self.apply(snapshot)
-                    }
+            let itemDeleted = tdDataManager.deleteItem(item: item)
+            DispatchQueue.main.async {
+                if itemDeleted {
+                    var snapshot = self.snapshot()
+                    snapshot.deleteItems([item])
+                    self.apply(snapshot)
                 }
             }
         }

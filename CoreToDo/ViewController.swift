@@ -10,6 +10,8 @@ import CoreData
 
 class ViewController: UIViewController {
     
+    let tdDataManager = TDDataManager()
+    
     let tableView: UITableView = {
         let table = UITableView()
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
@@ -17,7 +19,7 @@ class ViewController: UIViewController {
     }()
         
     private lazy var dataSource: TDDataSource = {
-        return TDDataSource(tableView: tableView) { (tableView, indexPath, model) -> UITableViewCell? in
+        return TDDataSource(dataManager: tdDataManager, tableView: tableView) { (tableView, indexPath, model) -> UITableViewCell? in
             let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as UITableViewCell
             cell.textLabel?.text = model.name
             return cell
@@ -77,11 +79,10 @@ class ViewController: UIViewController {
             guard let field = alert.textFields?.first, let text = field.text, !text.isEmpty else {
                 return
             }
-            
-            TDDataManager.shared.createItem(name: text) { (success) in
-                if success {
-                    self.getAllItems()
-                }
+
+            if self.tdDataManager.createItem(name: text) {
+                print("HELLO")
+                self.getAllItems()
             }
         }))
         present(alert, animated: true, completion: nil)
@@ -93,13 +94,10 @@ class ViewController: UIViewController {
     }
     
     fileprivate func getAllItems() {
-        TDDataManager.shared.getAllItems { [weak self](items) in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                self.items = items
-                self.dataSource.updateDataSource(on: items)
-                self.tableView.refreshControl?.endRefreshing()
-            }
+        DispatchQueue.main.async {
+            self.items = self.tdDataManager.getAllItems()
+            self.dataSource.updateDataSource(on: self.items)
+            self.tableView.refreshControl?.endRefreshing()
         }
     }
 }
@@ -127,11 +125,9 @@ extension ViewController: UITableViewDelegate {
                 guard let field = alert.textFields?.first, let newName = field.text, !newName.isEmpty else {
                     return
                 }
-
-                TDDataManager.shared.updateItem(item: item, newName: newName) { (success) in
-                    if success {
-                        self.getAllItems()
-                    }
+                
+                if self.tdDataManager.updateItem(item: item, newName: newName) {
+                    self.getAllItems()
                 }
             }))
             self.present(alert, animated: true, completion: nil)
@@ -148,11 +144,12 @@ extension ViewController: UISearchResultsUpdating, UISearchBarDelegate {
             DispatchQueue.main.async { self.dataSource.updateDataSource(on: self.items) }
             return
         }
-        isSearching = true
         
-        TDDataManager.shared.filterItems(name: filter) { [weak self](filteredItems) in
-            guard let self = self else { return }
-            DispatchQueue.main.async { self.dataSource.updateDataSource(on: filteredItems) }
+        DispatchQueue.main.async {
+            self.isSearching = true
+            let fileteredItems = self.tdDataManager.filterItems(name: filter)
+            self.dataSource.updateDataSource(on: fileteredItems)
+            self.isSearching = false
         }
     }
 }
