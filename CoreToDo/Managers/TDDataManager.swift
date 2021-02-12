@@ -24,9 +24,6 @@ class TDDataManager {
     }
     
     
-    
-//    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
     /// This function gets all to do items saved in CoreData
     /// - Returns: Returns array of ToDoListItem
     func getAllItems() -> [ToDoListItem] {
