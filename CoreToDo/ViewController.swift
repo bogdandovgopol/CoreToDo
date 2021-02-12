@@ -81,7 +81,6 @@ class ViewController: UIViewController {
             }
 
             if self.tdDataManager.createItem(name: text) {
-                print("HELLO")
                 self.getAllItems()
             }
         }))

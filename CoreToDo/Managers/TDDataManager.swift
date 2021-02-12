@@ -10,15 +10,16 @@ import CoreData
 
 class TDDataManager {
     
-    let persistantContainer: NSPersistentContainer
+    let persistantContainer: NSPersistentCloudKitContainer
     
     init() {
-        persistantContainer = NSPersistentContainer(name: "CoreToDo")
-        persistantContainer.loadPersistentStores { (description, error) in
+        persistantContainer = NSPersistentCloudKitContainer(name: "CoreToDo")
+        persistantContainer.loadPersistentStores { [weak self](description, error) in
+            guard let self = self else { return }
             if let error = error {
                 fatalError("Core Data store failed to load with error: \(error)")
             }
-//            persistantContainer.viewpersistantContainer.viewContext.automaticallyMergesChangesFromParent = true
+            self.persistantContainer.viewContext.automaticallyMergesChangesFromParent = true
         }
     }
     
