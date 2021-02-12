@@ -8,7 +8,7 @@
 import UIKit
 import CoreData
 
-class TDDataManager {
+final class TDDataManager {
     
     let persistantContainer: NSPersistentCloudKitContainer
     
